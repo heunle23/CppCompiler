@@ -1,6 +1,8 @@
 #include <iostream>
-
 using namespace std;
+
+const int MAX = 100;
+
 
 struct Node{
     int data;
@@ -10,9 +12,22 @@ struct Node{
 
 
 class SymbolTable{
+
+private:
+Node* table[MAX];
+
 public:
-    Node* table[100];
     
+    
+    
+    SymbolTable(){
+        for (int i = 0; i < MAX; i++)
+        {
+            table[i] = nullptr;
+
+        }
+        
+    }
     
 };
 
@@ -21,5 +36,7 @@ public:
 int main(){
 
     SymbolTable st;
+
+    cout << st.table[99] << endl;
 
 }
