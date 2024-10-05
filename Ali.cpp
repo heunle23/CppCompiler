@@ -14,10 +14,10 @@ struct Node{
 class SymbolTable{
 
 private:
-Node* table[MAX];
+// Node* table[MAX];
 
 public:
-    
+    Node* table[MAX];
     
     
     SymbolTable(){
@@ -37,6 +37,6 @@ int main(){
 
     SymbolTable st;
 
-    cout << st.table[99] << endl;
+    
 
 }
