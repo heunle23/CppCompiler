@@ -8,17 +8,12 @@ struct Node{
 
 };
 
+
 class SymbolTable{
-
-
 public:
-    Node* table;
-    SymbolTable() {
-        table = new Node[100];
-        
-
-
-};
+    Node* table[100];
+    
+    
 };
 
 
@@ -26,7 +21,5 @@ public:
 int main(){
 
     SymbolTable st;
-
-
 
 }
