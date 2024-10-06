@@ -4,10 +4,22 @@ using namespace std;
 const int MAX = 100;
 
 
+
+
+
+
 struct Node{
-    int data;
+    string name;
+    string info; // نیزا به بازنویسی دارد
+    
+
     Node* next;
 
+    Node(string name){
+        this->name = name;
+        //this->info = info;
+        this->next = nullptr;
+    }
 };
 
 
@@ -17,7 +29,7 @@ private:
 // Node* table[MAX];
 
 public:
-    Node* table[MAX];
+    Node* table[100];
     
     
     SymbolTable(){
@@ -27,9 +39,116 @@ public:
 
         }
         
+    };
+
+    Node* Connect(string& identifier);
+
+
+    unsigned int hashfunc(const string& identifier);
+
+    Node* find(string& identifier) ;
+
+    Node* insert(string& identifier);
+ 
+};
+
+
+
+
+
+
+Node* SymbolTable::find(string& identifier){
+    int adress = hashfunc(identifier);
+    Node* temp_node = table[adress];
+    
+
+    if (temp_node == nullptr){
+        return nullptr;
     }
     
+    while (temp_node != nullptr){
+        if (temp_node->name == identifier){
+            return temp_node;
+        }
+        temp_node = temp_node->next;
+    }
+    return nullptr;
+
+
+}
+
+
+// این تابع باید اصلاعات بیشتری بگیرد 
+// باید info و type را بگیرد
+Node* SymbolTable::Connect(string& identifier){
+    
+    Node* exist = find(identifier);
+    if (exist != nullptr) {
+        return exist;
+    }
+    
+    return insert(identifier);
 };
+
+
+Node* SymbolTable::insert(string& identifier){
+    int adress = hashfunc(identifier);
+    Node* temp = table[adress];
+
+    if (temp == nullptr) {
+        table[adress] = new Node(identifier);
+        return table[adress];
+    }
+
+    while (temp->next != nullptr){
+        temp = temp->next;
+    }
+    Node* p = new Node(identifier);
+    temp->next = p;
+
+    return temp->next;
+
+};
+
+
+
+
+
+//Horner's Rule
+unsigned int SymbolTable::hashfunc(const string& identifier) {
+    unsigned int hash_value = 0;
+    const int base = 31; // ایا  ۳۱ برای ۱۰۰ خانه بهتر است 
+
+    for (char c : identifier) {
+        hash_value = hash_value * base + c;
+    }
+
+    return hash_value % 100; 
+};
+
+
+
+
+int main(){
+    
+    string ab = "ab";
+    string ba = "ba" ;
+
+    SymbolTable st;
+    
+    cout << st.Connect(ab) << endl;
+    cout << st.Connect(ba) << endl;
+  
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -46,25 +165,4 @@ void accepted_char(){
             cout << i << ": " << c << std::endl;
         }
     }
-}
-
-//Horner's Rule
-unsigned int hashfunc(const string& identifier) {
-    unsigned int hash_value = 0;
-    const int base = 31; // Prime number for better distribution
-
-    for (char c : identifier) {
-        hash_value = hash_value * base + c;
-    }
-
-    return hash_value % 100; // Modulo 100 to fit within the array size
-}
-
-
-int main(){
-
-    SymbolTable st;
-
-    
-
 }
