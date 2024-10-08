@@ -10,7 +10,7 @@ const int MAX = 100;
 
 struct Node{
     string name;
-    string info; // نیزا به بازنویسی دارد
+    string info; // نیاز به بازنویسی دارد
     
 
     Node* next;
