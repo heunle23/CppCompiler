@@ -30,7 +30,7 @@ bool append_file(string data, string file_name){
 
 bool read_file(string file_name){
     ifstream file;
-    file.open("hi.txt");
+    file.open(file_name);
     if (!file)
         return 0;
     else {
@@ -51,10 +51,3 @@ int main(){
     
     
 }
-
-
-
-
-
-
-
