@@ -1,7 +1,5 @@
-// C++ Program to implement a lexical analyzer
-
 #include <iostream>
-#include <fstream>  // Include fstream for file handling
+#include <fstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,7 +32,6 @@ private:
     size_t position;
     unordered_map<string, TokenType> keywords;
 
-    // Function to initialize the keywords map
     void initKeywords() {
         keywords["int"] = TokenType::KEYWORD;
         keywords["float"] = TokenType::KEYWORD;
@@ -44,27 +41,22 @@ private:
         keywords["return"] = TokenType::KEYWORD;
     }
 
-    // Function to check if a character is whitespace
     bool isWhitespace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
 
-    // Function to check if a character is alphabetic
     bool isAlpha(char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
-    // Function to check if a character is a digit
     bool isDigit(char c) {
         return c >= '0' && c <= '9';
     }
 
-    // Function to check if a character is alphanumeric
     bool isAlphaNumeric(char c) {
         return isAlpha(c) || isDigit(c);
     }
 
-    // Function to get the next word (identifier or keyword) from the input
     string getNextWord() {
         size_t start = position;
         while (position < input.length() && isAlphaNumeric(input[position])) {
@@ -73,13 +65,12 @@ private:
         return input.substr(start, position - start);
     }
 
-    // Function to get the next number (integer or float) from the input
     string getNextNumber() {
         size_t start = position;
         bool hasDecimal = false;
         while (position < input.length() && (isDigit(input[position]) || input[position] == '.')) {
             if (input[position] == '.') {
-                if (hasDecimal) break; // Only one decimal point allowed
+                if (hasDecimal) break;
                 hasDecimal = true;
             }
             position++;
@@ -88,26 +79,28 @@ private:
     }
 
 public:
-    // Constructor for LexicalAnalyzer
-    LexicalAnalyzer(const string& source)
-        : input(source), position(0) {
+    LexicalAnalyzer() : position(0) {
         initKeywords();
     }
 
-    // Function to tokenize the input string
+    // Set the input for the lexical analyzer to process
+    void setInput(const string& source) {
+        input = source;
+        position = 0;
+    }
+
+    // Tokenize the input string
     vector<Token> tokenize() {
         vector<Token> tokens;
 
         while (position < input.length()) {
             char currentChar = input[position];
 
-            // Skip whitespace
             if (isWhitespace(currentChar)) {
                 position++;
                 continue;
             }
 
-            // Identify keywords or identifiers
             if (isAlpha(currentChar)) {
                 string word = getNextWord();
                 if (keywords.find(word) != keywords.end()) {
@@ -115,28 +108,20 @@ public:
                 } else {
                     tokens.emplace_back(TokenType::IDENTIFIER, word);
                 }
-            }
-            // Identify integer or float literals
-            else if (isDigit(currentChar)) {
+            } else if (isDigit(currentChar)) {
                 string number = getNextNumber();
                 if (number.find('.') != string::npos) {
                     tokens.emplace_back(TokenType::FLOAT_LITERAL, number);
                 } else {
                     tokens.emplace_back(TokenType::INTEGER_LITERAL, number);
                 }
-            }
-            // Identify operators
-            else if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/') {
+            } else if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/') {
                 tokens.emplace_back(TokenType::OPERATOR, string(1, currentChar));
                 position++;
-            }
-            // Identify punctuators
-            else if (currentChar == '(' || currentChar == ')' || currentChar == '{' || currentChar == '}' || currentChar == ';') {
+            } else if (currentChar == '(' || currentChar == ')' || currentChar == '{' || currentChar == '}' || currentChar == ';') {
                 tokens.emplace_back(TokenType::PUNCTUATOR, string(1, currentChar));
                 position++;
-            }
-            // Handle unknown characters
-            else {
+            } else {
                 tokens.emplace_back(TokenType::UNKNOWN, string(1, currentChar));
                 position++;
             }
@@ -149,66 +134,61 @@ public:
 // Function to convert TokenType to string for printing
 string getTokenTypeName(TokenType type) {
     switch (type) {
-    case TokenType::KEYWORD: return "KEYWORD";
-    case TokenType::IDENTIFIER: return "IDENTIFIER";
-    case TokenType::INTEGER_LITERAL: return "INTEGER_LITERAL";
-    case TokenType::FLOAT_LITERAL: return "FLOAT_LITERAL";
-    case TokenType::OPERATOR: return "OPERATOR";
-    case TokenType::PUNCTUATOR: return "PUNCTUATOR";
-    case TokenType::UNKNOWN: return "UNKNOWN";
-    default: return "UNDEFINED";
+        case TokenType::KEYWORD: return "KEYWORD";
+        case TokenType::IDENTIFIER: return "IDENTIFIER";
+        case TokenType::INTEGER_LITERAL: return "INTEGER_LITERAL";
+        case TokenType::FLOAT_LITERAL: return "FLOAT_LITERAL";
+        case TokenType::OPERATOR: return "OPERATOR";
+        case TokenType::PUNCTUATOR: return "PUNCTUATOR";
+        case TokenType::UNKNOWN: return "UNKNOWN";
+        default: return "UNDEFINED";
     }
 }
 
-// Function to print all tokens
-void printTokens(const vector<Token>& tokens) {
-    for (const auto& token : tokens) {
-        cout << "Type: " << getTokenTypeName(token.type) << ", Value: " << token.value << endl;
-    }
+// Function to read and return a chunk of source code from the file
+string readSourceFromFile(ifstream& file, size_t bufferSize) {
+    char* buffer = new char[bufferSize];    // Allocate a buffer
+    file.read(buffer, bufferSize);          // Read from file into the buffer
+    string chunk(buffer, file.gcount());    // Create a string from the buffer
+    delete[] buffer;                       // Free the buffer memory
+    return chunk;                           // Return the read chunk
 }
 
-// Function to read source code from a text file
-string readSourceFromFile(const string& filename) {
-    ifstream file(filename);
+// Function to process the file chunk by chunk using a buffer
+void processFile(const string& filename, size_t bufferSize) {
+    ifstream file(filename);  // Open the file
     if (!file.is_open()) {
         cerr << "Error: Unable to open file " << filename << endl;
-        return "";
+        return;
     }
 
-    string sourceCode;
-    string line;
-    while (getline(file, line)) {
-        sourceCode += line + "\n"; // Append line and add newline character
+    LexicalAnalyzer lexer;  // Create a lexical analyzer
+
+    // Read the file chunk by chunk until the end of the file
+    while (!file.eof()) {
+        string chunk = readSourceFromFile(file, bufferSize);
+        lexer.setInput(chunk);  // Set the current chunk as input for the lexer
+        vector<Token> tokens = lexer.tokenize();  // Tokenize the current chunk
+
+        // Print the tokens for the current chunk
+        for (const auto& token : tokens) {
+            cout << "Type: " << getTokenTypeName(token.type)
+                 << ", Value: " << token.value << endl;
+        }
     }
-    file.close();
-    return sourceCode;
+
+    file.close();  // Close the file
 }
 
-// Driver Code
+// Driver code
 int main() {
-    string filename = "source_code.txt"; // Name of the input file
+    string filename = "source_code.txt";  // Name of the file to process
+    size_t bufferSize = 512;  // Buffer size to read in chunks
 
-    // Read source code from the file
-    string sourceCode = readSourceFromFile(filename);
-
-    // Check if source code was read successfully
-    if (sourceCode.empty()) {
-        return 1; // Exit if there was an error reading the file
-    }
-
-    // Create a LexicalAnalyzer object
-    LexicalAnalyzer lexer(sourceCode);
-
-    // Tokenize the source code
-    vector<Token> tokens = lexer.tokenize();
-
-    // Print the original source code
-    cout << "Source code: " << sourceCode << endl << endl;
-
-    // Print all identified tokens
-    cout << "Tokens Generated by Lexical Analyzer:" << endl;
-    printTokens(tokens);
+    processFile(filename, bufferSize);  // Process the file with the buffer
 
     return 0;
 }
+
+
 
