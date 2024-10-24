@@ -189,6 +189,14 @@ int main() {
     processFile(filename, bufferSize);  // Process the file with the buffer
 
     return 0;
+    string ab = "ab";
+    string ba = "ba" ;
+
+    SymbolTable st;
+    
+    cout << st.Connect(ab) << endl;
+    cout << st.Connect(ba) << endl;
+
 }
 
 
