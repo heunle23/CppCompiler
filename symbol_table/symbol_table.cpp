@@ -1,14 +1,11 @@
 #include <iostream>
+#include "symbol_table.h"
 using namespace std;
 
-const int MAX = 100;
 
 
 
-
-
-
-struct Node{
+/*struct Node{
     string name;
     string info; // نیاز به بازنویسی دارد
     
@@ -23,7 +20,11 @@ struct Node{
 };
 
 
-class SymbolTable{
+
+
+
+
+/*class SymbolTable{
 
 private:
 // Node* table[MAX];
@@ -50,7 +51,7 @@ public:
 
     Node* insert(string& identifier);
  
-};
+};*/
 
 
 
@@ -129,17 +130,7 @@ unsigned int SymbolTable::hashfunc(const string& identifier) {
 
 
 
-int main(){
-    
-    string ab = "ab";
-    string ba = "ba" ;
 
-    SymbolTable st;
-    
-    cout << st.Connect(ab) << endl;
-    cout << st.Connect(ba) << endl;
-  
-}
 
 
 
