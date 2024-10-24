@@ -188,7 +188,7 @@ int main() {
 
     processFile(filename, bufferSize);  // Process the file with the buffer
 
-    return 0;
+    cout << endl;
     string ab = "ab";
     string ba = "ba" ;
 
