@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "../symbol_table/symbol_table.h"
 using namespace std;
 
 // Enum class to define different types of tokens
