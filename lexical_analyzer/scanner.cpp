@@ -14,7 +14,8 @@ enum class TokenType {
     FLOAT_LITERAL,
     OPERATOR,
     PUNCTUATOR,
-    UNKNOWN
+    UNKNOWN,
+    ENDOFBUFFER,
 };
 
 // Struct to represent a token with its type and value
@@ -28,20 +29,14 @@ struct Token {
 };
 
 
-
-
-
-
-
-
-
-
-
-class LexicalAnalyzer {
-private:
+class Tools {
+    public:
     array<char, 100>  buffer;
     vector<char> temp;
     int line = 0;
+    int i=0;
+    ifstream file;
+    Token token;
 
     bool is_sign(char c){
         return c == '+' || c == '-' ;
@@ -49,13 +44,8 @@ private:
 
     bool is_addop(char c){
         return c == '+' || c == '-' ;
-    };
+    }
 
-
-
-
-
-    
     bool isWhitespace(char c) {
         return c == ' ' || c == '\t'  || c == '\r';
     }
@@ -82,8 +72,7 @@ private:
     
     bool is_equl(char c){
         return c == '=';
-    }
-
+    };
 
     void retract(){
         temp.pop_back();
@@ -97,8 +86,72 @@ private:
         return c == ' ' || c == '\t'  || c == '\r' || c == '\n';
     }
 
-    void tokenize(array<char, 100>& buffer){
-        int i=0;
+
+};
+
+
+
+
+
+
+
+
+class LexicalAnalyzer : public Tools{
+private:
+    
+    bool fill_buffer(ifstream& file,array<char, 100>& buffer) {
+
+        if (file.eof()){
+            file.close();
+            return false;
+        }
+
+
+        file.read(buffer.data(), buffer.size());
+
+        if (file.gcount() < buffer.size()) {
+            // If fewer than 100 characters were read, fill the rest with null chars
+            fill(buffer.begin() + file.gcount(), buffer.end(), '\0');
+            }
+
+        return true;
+
+    };
+
+    void open_file(const string& filename) {
+        ifstream file(filename);  // Open the file
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file " << filename << endl;
+        }
+    };
+
+
+
+    Token touch(){
+        // ali : a function for parser to comunicate with our scanner
+        // each time this func is called , one token will be returned (exept when eof is true)
+        
+        token = tokenize();
+        
+        if (token.type == TokenType::ENDOFBUFFER){
+            i = 0;
+            bool feasible = fill_buffer(file,buffer);
+            if (feasible == false) {
+                //ali : (NEEDS TO BE IMPLEMENTED) scanner cant make token anymore , because eof is true 
+            }else{
+                token = tokenize();
+            }
+        
+        }
+        
+        return token;
+        
+
+    }
+
+
+
+    Token tokenize(){
 
         // ali : label_1 
         // سعی میشود هر بار که حلقه پایین شروع میشود وکتور خالی باشد
@@ -128,14 +181,23 @@ private:
                         temp.emplace_back(buffer[i]);  
                     }
                     else{
-                        // ali : if the program comes to this else , the vector for next loop wont be empty!
+                        // ali : (NEEDS TO BE IMPLEMENTED) if the program comes to this else , the vector for next loop wont be empty!
                         // we break the loop because the (i == 100) is true
-                        break; 
+                        // time to refill the buffer 
+                        return Token(TokenType::ENDOFBUFFER,"0",0); 
                     }
                 }
                 while (! is_delimiter(buffer[i]) && isAlphaNumeric(buffer[i]) );
-                retract();
-                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword token
+                
+                if  ( is_delimiter(buffer[i]) ){
+                    retract();
+                }
+                else if (!isAlphaNumeric(buffer[i]))
+                {
+                    /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
+                }
+            
+                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token 
                     }
 
 
@@ -148,11 +210,18 @@ private:
                     }
                     else{
                         // ali : if the program comes to this else the vector for next loop wont be empty!
-                        break;
+                        return Token(TokenType::ENDOFBUFFER,"0",0);
                     }
                 }
-                while (! is_delimiter(buffer[i]) || isAlphaNumeric(buffer[i]) );
-                retract();
+                while (! is_delimiter(buffer[i]) || isDigit(buffer[i]) );
+                
+                if  ( is_delimiter(buffer[i]) ){
+                    retract();
+                }
+                else if (!isDigit(buffer[i]))
+                {
+                    /* raise lexical error */
+                }
                 // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
                 }
                 
@@ -160,35 +229,46 @@ private:
 
 
 
-            /*
-            else if (isWhitespace(buffer[i])){
-                temp.pop_back();
-                i++;
-                continue;
-            }
-            */
+            
 
             else if (is_addop(buffer[i])) {
-                // ali : create addop token 
+                // ali : create addop token (NEEDS TO BE IMPLEMENTED)
                 i++;
                 continue;
             }
             else if (is_equl(buffer[i])) {
-                // ali : create relop tokeen
+                // ali : create relop token (NEEDS TO BE IMPLEMENTED)
                 i++;
                 continue;
             }
             else if (is_start_relop(buffer[i])){
                 temp.emplace_back(buffer[i]);
                 i++;
+                
                 if (i<100){
-                    if ()
-                }
-                else{
-
+                    if (buffer[i] == '>' || buffer[i] == '=' ){
+                        // ali : check if the two character relop is valid
+                        // for example : '<<' is not valid
+                        // (NEEDS TO BE IMPLEMENTED)
+                        // create two char realop token
+                        i++;
+                    }
+                    else if (is_delimiter(buffer[i])){
+                        //ali : (NEEDS TO BE IMPLEMENTED)
+                        // create one char realop token
+                        i++;
+                    }
+                    else{
+                        //ali : (NEEDS TO BE IMPLEMENTED)
+                        // lexical error 
+                    }
                 }
                 
-                continue;
+                else{
+                    return Token(TokenType::ENDOFBUFFER,"0",0);
+                }
+                
+                
             }
 
 
@@ -206,32 +286,10 @@ private:
 
 
 
-    void fill_buffer(ifstream& file,array<char, 100>& buffer) {
+    
 
-        file.read(buffer.data(), buffer.size());
 
-        if (file.gcount() < buffer.size()) {
-            // If fewer than 100 characters were read, fill the rest with null chars
-            fill(buffer.begin() + file.gcount(), buffer.end(), '\0');
-            }
-    };
-
-    void processFile(const string& filename) {
-        ifstream file(filename);  // Open the file
-        if (!file.is_open()) {
-            cerr << "Error: Unable to open file " << filename << endl;
-            return;
-        }
-
-        // 
-        while (!file.eof()) {
-            fill_buffer(file, buffer);
-            tokenize(buffer);
-            
-        }
-
-        file.close();  // Close the file
-    };
+    
 
 
     
