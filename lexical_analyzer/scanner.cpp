@@ -97,6 +97,11 @@ class Tools {
 
 
 class LexicalAnalyzer : public Tools{
+public:
+        LexicalAnalyzer()
+        
+
+        ;
 private:
     
     bool fill_buffer(ifstream& file,array<char, 100>& buffer) {
@@ -202,27 +207,73 @@ private:
 
 
             else if (isDigit(buffer[i])){
-                temp.emplace_back(buffer[i]);
-                do {
-                    i++;
-                    if (i<100){
-                        temp.emplace_back(buffer[i]);   
+                if (temp.size() == 0){
+                    temp.emplace_back(buffer[i]);
+                    do {
+                        i++;
+                        if (i<100){
+                            temp.emplace_back(buffer[i]);   
+                        }
+                        else{
+                            // ali : if the program comes to this else the vector for next loop wont be empty!
+                            return Token(TokenType::ENDOFBUFFER,"0",0);
+                        }
                     }
-                    else{
-                        // ali : if the program comes to this else the vector for next loop wont be empty!
-                        return Token(TokenType::ENDOFBUFFER,"0",0);
+                    while (! is_delimiter(buffer[i]) || isDigit(buffer[i]) );
+                    
+                    if  ( is_delimiter(buffer[i]) ){
+                        retract();
                     }
+                    else if (!isDigit(buffer[i]))
+                    {
+                        /* raise lexical error */
+                    }
+                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
                 }
-                while (! is_delimiter(buffer[i]) || isDigit(buffer[i]) );
+                else{
+                    // ali :this digit might be part of a identifier
+                    int j = 0;
+                    while ( j < temp.size() ){
+                        if (isAlpha(temp[j])){
+                            // ali :if we find one alpha so this was ofc a identifier
+                            temp.emplace_back(buffer[i]);
+                    do {
+                        i++;
+                        if (i<100){
+                            temp.emplace_back(buffer[i]);  
+                        }
+                        else{
+                            // ali : (NEEDS TO BE IMPLEMENTED) if the program comes to this else , the vector for next loop wont be empty!
+                            // we break the loop because the (i == 100) is true
+                            // time to refill the buffer 
+                            return Token(TokenType::ENDOFBUFFER,"0",0); 
+                        }
+                    }
+                    while (! is_delimiter(buffer[i]) && isAlphaNumeric(buffer[i]) );
+                    
+                    if  ( is_delimiter(buffer[i]) ){
+                        retract();
+                    }
+                    else if (!isAlphaNumeric(buffer[i]))
+                    {
+                        /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
+                    }
                 
-                if  ( is_delimiter(buffer[i]) ){
-                    retract();
+                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token
+                                
+
+
+
+                            }
+                        j++;
+                    }
+
+
+
+
                 }
-                else if (!isDigit(buffer[i]))
-                {
-                    /* raise lexical error */
-                }
-                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
+
+                
                 }
                 
             
@@ -232,15 +283,26 @@ private:
             
 
             else if (is_addop(buffer[i])) {
+                if (temp.size() == 0){
+                    // ali : create addop token (NEEDS TO BE IMPLEMENTED)
+                    i++;
+                    //  return  token
+                }
+                else{
+                    // ali : error , the '+' and '-' cant have any chat befor them .
+                }
+                
                 // ali : create addop token (NEEDS TO BE IMPLEMENTED)
                 i++;
                 continue;
             }
+
             else if (is_equl(buffer[i])) {
                 // ali : create relop token (NEEDS TO BE IMPLEMENTED)
                 i++;
                 continue;
             }
+
             else if (is_start_relop(buffer[i])){
                 temp.emplace_back(buffer[i]);
                 i++;
@@ -276,6 +338,10 @@ private:
 
 
         };
+        return Token(TokenType::ENDOFBUFFER,"0",0); 
+
+
+
         
     };
         
