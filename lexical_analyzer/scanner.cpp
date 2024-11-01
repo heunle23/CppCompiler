@@ -104,7 +104,9 @@ class Tools {
 class LexicalAnalyzer : public Tools{
 public:
         LexicalAnalyzer()
-        
+        // ali : (NEEDS TO BE IMPLEMENTED)  
+        // call open_file in here 
+        // call fill_buffer  
 
         ;
 private:
@@ -147,6 +149,7 @@ private:
             i = 0;
             bool feasible = fill_buffer(file,buffer);
             if (feasible == false) {
+                // if temp.size() != 0 { error }
                 //ali : (NEEDS TO BE IMPLEMENTED) scanner cant make token anymore , because eof is true 
             }else{
                 token = tokenize();
@@ -184,7 +187,7 @@ private:
                 }
                 else{
                     i++;
-                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword or 2 characters relop token
+                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword or one characters relop token
                     continue;
                 }
             }
@@ -205,7 +208,7 @@ private:
                         return Token(TokenType::ENDOFBUFFER,"0",0); 
                     }
                 }
-                while (! is_delimiter(buffer[i]) && isAlphaNumeric(buffer[i]) );
+                while (!is_delimiter(buffer[i]) && isAlphaNumeric(buffer[i]) );
                 
                 if  ( is_delimiter(buffer[i]) ){
                     retract();
@@ -245,11 +248,21 @@ private:
                 }
                 else{
                     // ali :this digit might be part of a identifier
+
+                    // ali : we dont need while , if temp is an identifier the first char is alpha 
+                    // isAlpha(temp[0]) is true
+
+
                     int j = 0;
                     while ( j < temp.size() ){
                         if (isAlpha(temp[j])){
                             // ali :if we find one alpha so this was ofc a identifier
                             temp.emplace_back(buffer[i]);
+
+
+
+
+
                     do {
                         i++;
                         if (i < buffer_size){
@@ -293,7 +306,7 @@ private:
 
 
 
-            
+            // ali : couldnt write it 
 
             else if (is_addop(buffer[i])) {
                 if (temp.size() == 0){
