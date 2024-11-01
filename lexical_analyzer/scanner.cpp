@@ -6,6 +6,8 @@ using namespace std;
 #include <vector>
 #include <array>
 
+const int buffer_size = 128;
+
 
 enum class TokenType {
     KEYWORD,
@@ -31,10 +33,13 @@ struct Token {
 
 class Tools {
     public:
-    array<char, 100>  buffer;
+    array<char, buffer_size> buffe_old, buffer_new;
+    //array<char, buffer_size>
     vector<char> temp;
     int line = 0;
     int i=0;
+    int j_old, j_new = 0;
+    bool choose_buffer = true; // if true we are in buffer old
     ifstream file;
     Token token;
 
@@ -104,7 +109,7 @@ public:
         ;
 private:
     
-    bool fill_buffer(ifstream& file,array<char, 100>& buffer) {
+    bool fill_buffer(ifstream& file,array<char, buffer_size>& buffer) {
 
         if (file.eof()){
             file.close();
@@ -162,12 +167,19 @@ private:
         // سعی میشود هر بار که حلقه پایین شروع میشود وکتور خالی باشد
         // ولی با توجه به بافر ها بعضی وقت ها این موضوع شدنی نیست.
        
-        while ( i<100 ) {
+        while ( i < buffer_size ) {
+            if (choose_buffer == true){
+                array<char, buffer_size>* buffer  = &buffe_old;
+                int* j = &j_old;
+
+            }
+
 
             if (is_delimiter(buffer[i])){
                 // ali : label_1 
                 if (temp.size() == 0){
                     i++;
+                    *j = i;
                     continue;
                 }
                 else{
@@ -182,7 +194,8 @@ private:
                 temp.emplace_back(buffer[i]);
                 do {
                     i++;
-                    if (i<100){
+                    (*j)++;
+                    if (i<buffer_size){
                         temp.emplace_back(buffer[i]);  
                     }
                     else{
@@ -239,7 +252,7 @@ private:
                             temp.emplace_back(buffer[i]);
                     do {
                         i++;
-                        if (i<100){
+                        if (i < buffer_size){
                             temp.emplace_back(buffer[i]);  
                         }
                         else{
