@@ -12,8 +12,7 @@ const char end_of_line = '\n';
 enum class TokenType {
     KEYWORD,
     IDENTIFIER,
-    INTEGER_LITERAL,
-    FLOAT_LITERAL,
+    INTEGER,
     OPERATOR,
     PUNCTUATOR,
     RELOP,
@@ -205,18 +204,9 @@ public:
             
 
 
-            if (is_delimiter(current_buff[i])){
+            if (is_delimiter(current_buff[fp])){
                 // ali : label_1 
-                if (temp.size() == 0){
-                    fp++;
-                    bp = fp;
-                    continue;
-                }
-                else{
-                    i++;
-                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword or one characters relop token
-                    continue;
-                }
+                fp++;
             }
             
             // identifier or keyword
@@ -277,84 +267,59 @@ public:
 
 
             else if (isDigit(current_buff[fp])){
-                if (temp.size() == 0){
-                    temp.emplace_back(current_buff[fp]);
-                    do {
-                        i++;
-                        if (i<100){
-                            temp.emplace_back(current_buff[fp]);   
+                bp = fp;
+                do {
+                    
+                    if (fp < buffer_size - 1){
+                        fp++;   
+                    }
+                    else{
+                        switch_buffer();
+                        if( !is_token_seperated ){
+                            is_token_seperated = true;
                         }
                         else{
-                            // ali : if the program comes to this else the vector for next loop wont be empty!
-                            return Token(TokenType::ENDOFBUFFER,"0",0);
+                            //  lexical error // message : the lenght of token cant be more than 256
                         }
                     }
-                    while (! is_delimiter(current_buff[fp]) || isDigit(current_buff[fp]) );
-                    
-                    if  ( is_delimiter(current_buff[fp]) ){
-                        retract();
+                }
+                while (!is_delimiter(current_buff[fp]) && isDigit(current_buff[fp]) );
+                
+                if  ( is_delimiter(current_buff[fp]) ){
+                    retract();
+                }
+                else if (!isDigit(current_buff[fp]))
+                {
+                    /* raise lexical error -> start with digit but alpha after that */
+                }
+                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
+
+                string num = "";
+                if (is_token_seperated){
+                    for (int i = bp; bp < 128; bp++){
+                        num += previous_buff[i];}
+                    for (int i = 0; i <= fp; bp++){
+                        num += current_buff[i];
                     }
-                    else if (!isDigit(current_buff[fp]))
-                    {
-                        /* raise lexical error */
-                    }
-                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
                 }
                 else{
-                    // ali :this digit might be part of a identifier
-
-                    // ali : we dont need while , if temp is an identifier the first char is alpha 
-                    // isAlpha(temp[0]) is true
-
-
-                    int j = 0;
-                    while ( j < temp.size() ){
-                        if (isAlpha(temp[j])){
-                            // ali :if we find one alpha so this was ofc a identifier
-                            temp.emplace_back(current_buff[fp]);
-
-
-
-
-
-                    do {
-                        i++;
-                        if (i < buffer_size){
-                            temp.emplace_back(current_buff[fp]);  
-                        }
-                        else{
-                            // ali : (NEEDS TO BE IMPLEMENTED) if the program comes to this else , the vector for next loop wont be empty!
-                            // we break the loop because the (i == 100) is true
-                            // time to refill the buffer 
-                            return Token(TokenType::ENDOFBUFFER,"0",0); 
-                        }
+                    for (i = bp; i <= fp; i++){
+                        num += current_buff[i];
                     }
-                    while (! is_delimiter(current_buff[fp]) && isAlphaNumeric(current_buff[fp]) );
-                    
-                    if  ( is_delimiter(current_buff[fp]) ){
-                        retract();
-                    }
-                    else if (!isAlphaNumeric(current_buff[fp]))
-                    {
-                        /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
-                    }
-                
-                    // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token
-                                
-
-
-
-                            }
-                        j++;
-                    }
-
-
-
-
                 }
 
                 
-                }
+                is_token_seperated = false;
+                return Token(TokenType::INTEGER, num, line);
+                    }
+                
+
+            
+            
+                
+
+                
+                
                 
             
 
