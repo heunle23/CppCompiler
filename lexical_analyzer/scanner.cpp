@@ -7,7 +7,7 @@ using namespace std;
 #include <array>
 
 const int buffer_size = 128;
-
+const char end_of_line = '\n';
 
 enum class TokenType {
     KEYWORD,
@@ -16,10 +16,14 @@ enum class TokenType {
     FLOAT_LITERAL,
     OPERATOR,
     PUNCTUATOR,
-    relop,
-    UNKNOWN,
+    RELOP,
     ENDOFBUFFER,
 };
+
+
+
+
+
 
 // Struct to represent a token with its type and value
 struct Token {
@@ -33,16 +37,20 @@ struct Token {
 
 
 class Tools {
-    public:
-    array<char, buffer_size> buffe_old, buffer_new;
+public:
+    array<char, buffer_size> current_buff, previous_buff;
     //array<char, buffer_size>
     vector<char> temp;
     int line = 0;
     int i=0;
-    int bp=0, fp=0;  // bp: backward point <><><> fp: forward point
-    bool two_buffer= true; // if true we are in buffer old
+    bool is_token_seperated = false; // if true our bp is in the previous_buff. and fp in current_buff.
     ifstream file;
     Token token;
+    int bp , fp;
+    
+
+
+
 
     bool is_sign(char c){
         return c == '+' || c == '-' ;
@@ -81,12 +89,12 @@ class Tools {
     };
 
     void retract(){
-        temp.pop_back();
+        fp--;
     }
 
     bool is_delimiter(char c){
         // ali : we check if '\n' is used , we increase the line int .
-        if (c == '\n'){
+        if (c == end_of_line){
             line++;
         }
         return c == ' ' || c == '\t'  || c == '\r' || c == '\n';
@@ -110,17 +118,17 @@ public:
         // call fill_buffer  
 
         ;
-private:
+
     unordered_map<string, TokenType> keywords;
 
     void initKeywords() {
-        keywords["program"] = TokenType::KEYWORD;
-        keywords["begin"] = TokenType::KEYWORD;
-        keywords["integer"] = TokenType::KEYWORD;
-        keywords["end"] = TokenType::KEYWORD;
-        keywords["function"] = TokenType::KEYWORD;
-        keywords["div"] = TokenType::KEYWORD;
-        keywords["mod"] = TokenType::KEYWORD;
+        keywords["PROGRAM"] = TokenType::KEYWORD;
+        keywords["BEGIN"] = TokenType::KEYWORD;
+        keywords["INTEGER"] = TokenType::KEYWORD;
+        keywords["END"] = TokenType::KEYWORD;
+        keywords["FUNCTION"] = TokenType::KEYWORD;
+        keywords["DIV"] = TokenType::KEYWORD;
+        keywords["MOD"] = TokenType::KEYWORD;
     }
     
     bool fill_buffer(ifstream& file,array<char, buffer_size>& buffer) {
@@ -172,7 +180,18 @@ private:
         return token;
         
 
+    };
+
+
+    void switch_buffer(){
+        array<char, buffer_size> new_buffer; 
+        fill_buffer(file,new_buffer);
+
+        previous_buff = current_buff;
+        current_buff = new_buffer;
+        fp = 0;
     }
+
 
 
 
@@ -183,18 +202,14 @@ private:
         // ولی با توجه به بافر ها بعضی وقت ها این موضوع شدنی نیست.
        
         while ( fp < buffer_size ) {
-            if (two_buffer){
-                array<char, buffer_size>* buffer  = &buffe_old;
-                int* j = &j_old;
-
-            }
+            
 
 
-            if (is_delimiter((*buffer)[i])){
+            if (is_delimiter((current_buff)[i])){
                 // ali : label_1 
                 if (temp.size() == 0){
                     fp++;
-                    bf = fp;
+                    bp = fp;
                     continue;
                 }
                 else{
@@ -204,31 +219,46 @@ private:
                 }
             }
             
-
-            if (isAlpha((*buffer)[fp])){
-                fb = fp;
+            // identifier or keyword
+            if (isAlpha((current_buff)[fp])){
+                bp = fp;
                 do {
-                    if (fp<buffer_size){
+                    if (fp != buffer_size-1){
                         fp++;  
                     }
                     else{
-                        // ali : (NEEDS TO BE IMPLEMENTED) if the program comes to this else , the vector for next loop wont be empty!
-                        // we break the loop because the (i == 100) is true
-                        // time to refill the buffer 
-                        return Token(TokenType::ENDOFBUFFER,"0",0); 
+                        switch_buffer();
+                        if( !is_token_seperated ){
+                            is_token_seperated = true;
+                        }
+                        else{
+                            //  lexical error // message : the lenght of token cant be more than 256
+                        }
+                        
                     }
                 }
-                while (!is_delimiter((*buffer)[fp]) && isAlphaNumeric((*buffer)[fp]) );
+                while (!is_delimiter((current_buff)[fp]) && isAlphaNumeric((current_buff)[fp]) );
                 
-                if  ( is_delimiter((*buffer)[fp]) ){
+                if  ( is_delimiter((current_buff)[fp]) ){
                     retract();
                 }
-                else if (!isAlphaNumeric((*buffer)[fp]))
+                else if (!isAlphaNumeric((current_buff)[fp]))
                 {
                     /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
                 }
             
                 // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token 
+                string word = "";
+                previous_buff[bp]
+                
+                if (keywords.find(word) != keywords.end()) {
+                    
+                }
+                else{
+
+                }
+                
+                is_token_seperated = false;
                     }
 
 
@@ -397,7 +427,6 @@ private:
 
 
 
-    
 
 
     
@@ -416,3 +445,4 @@ private:
 int main() {
     
 }
+    
