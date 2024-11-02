@@ -15,8 +15,11 @@ enum class TokenType {
     INTEGER,
     OPERATOR,
     PUNCTUATOR,
-    RELOP,
     ENDOFBUFFER,
+    ADD_SIGN,
+    MINUS_SIGN,
+    RELATION_OPERATOR,
+    MULTOP
 };
 
 
@@ -79,13 +82,33 @@ public:
         return isAlpha(c) || isDigit(c);
     }
 
+    bool check_relop(string s){
+        return s == "<>" || s =="<=" || s ==">=" ;
+    }
+
     bool is_start_relop(char c){
-        return c == '<' || c == '>' || '=';
+        return c == '<' || c == '>' ;
+    }
+
+    bool is_end_relop(char c){
+        return  c == '>' || '=';
+    }
+
+    bool is_punc(char c){
+        return c == '.' || c == ';'  || c == ',' , c == '(', c == ')' ;
     }
     
     bool is_equl(char c){
         return c == '=';
     };
+
+    bool is_multop(string s){
+        return s == "MOD" || s == "DIV" ;
+    }
+
+    bool is_multop(char c){
+        return c == '*' || c == '/' ;
+    }
 
     void retract(){
         fp--;
@@ -128,6 +151,17 @@ public:
         keywords["FUNCTION"] = TokenType::KEYWORD;
         keywords["DIV"] = TokenType::KEYWORD;
         keywords["MOD"] = TokenType::KEYWORD;
+        keywords["FOR"] = TokenType::KEYWORD;
+        keywords["WHILE"] = TokenType::KEYWORD;
+        keywords["ELSE"] = TokenType::KEYWORD;
+        keywords["DO"] = TokenType::KEYWORD;
+        keywords["DOWN"] = TokenType::KEYWORD;
+        keywords["TO"] = TokenType::KEYWORD;
+        keywords["IF"] = TokenType::KEYWORD;
+        keywords["THEN"] = TokenType::KEYWORD;
+        
+
+
     }
     
     bool fill_buffer(ifstream& file,array<char, buffer_size>& buffer) {
@@ -164,17 +198,7 @@ public:
         
         token = tokenize();
         
-        if (token.type == TokenType::ENDOFBUFFER){
-            i = 0;
-            bool feasible = fill_buffer(file,buffer);
-            if (feasible == false) {
-                // if temp.size() != 0 { error }
-                //ali : (NEEDS TO BE IMPLEMENTED) scanner cant make token anymore , because eof is true 
-            }else{
-                token = tokenize();
-            }
-        
-        }
+
         
         return token;
         
@@ -200,13 +224,13 @@ public:
         // سعی میشود هر بار که حلقه پایین شروع میشود وکتور خالی باشد
         // ولی با توجه به بافر ها بعضی وقت ها این موضوع شدنی نیست.
        
-        while ( fp < buffer_size ) {
+        while ( fp < buffer_size-1 ) {
             
-
 
             if (is_delimiter(current_buff[fp])){
                 // ali : label_1 
                 fp++;
+                continue;
             }
             
             // identifier or keyword
@@ -254,6 +278,9 @@ public:
 
                 
                 if (keywords.find(word) != keywords.end()) {
+                    if (is_multop(word)){
+                        return Token(TokenType::MULTOP, word, line);
+                    }
                     return Token(TokenType::KEYWORD, word, line);
                     
                 }
@@ -292,7 +319,7 @@ public:
                 {
                     /* raise lexical error -> start with digit but alpha after that */
                 }
-                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the int or float token
+
 
                 string num = "";
                 if (is_token_seperated){
@@ -314,83 +341,123 @@ public:
                     }
                 
 
-            
-            
-                
-
-                
-                
-                
-            
 
 
-
-            // ali : couldnt write it 
-
-            else if (is_addop(current_buff[fp])) {
-                if (temp.size() == 0){
-                    // ali : create addop token (NEEDS TO BE IMPLEMENTED)
-                    i++;
-                    //  return  token
+            else if (current_buff[fp]== '+') {
+                string sign;
+                sign += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
                 }
                 else{
-                    // ali : error , the '+' and '-' cant have any chat befor them .
+                    switch_buffer();
+                }
+                return Token(TokenType::ADD_SIGN,sign,line);
+            }
+
+            else if (current_buff[fp]== '-') {
+                string sign;
+                sign += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
+                }
+                else{
+                    switch_buffer();
+                }
+                return Token(TokenType::MINUS_SIGN,sign,line);
+            }
+
+            else if (is_punc(current_buff[fp])) {
+                string punc;
+                punc += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
+                }
+                else{
+                    switch_buffer();
+                }
+                return Token(TokenType::PUNCTUATOR,punc,line);
+            }
+
+            else if (current_buff[fp] == ':') {
+                string punc;
+                punc += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
+                }
+                else{
+                    switch_buffer();
                 }
                 
-                // ali : create addop token (NEEDS TO BE IMPLEMENTED)
-                i++;
-                continue;
+                if (current_buff[fp] == '=' ){
+                    punc += current_buff[fp];
+                }
+
+                return Token(TokenType::PUNCTUATOR,punc,line);
             }
 
             else if (is_equl(current_buff[fp])) {
-                // ali : create relop token (NEEDS TO BE IMPLEMENTED)
-                i++;
-                continue;
+                string rel;
+                rel += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
+                }
+                else{
+                    switch_buffer();
+                }
+                return Token(TokenType::RELATION_OPERATOR,rel,line);
             }
 
             else if (is_start_relop(current_buff[fp])){
-                do{
-                
-                if (fp<100){
-                    if (current_buff[fp] == '>'){
-                        fp++;
-                        if (current_buff[fp] == '='){
-                            return Token(TokenType::relop, '>=', line)
-                        }
-                        return Token(TokenType::relop, '>', line)
-                    }
-                        
-                    if (current_buff[fp] == '<'){
-                        fp++;
-                        if (current_buff[fp] == '>'){
-                            return Token(TokenType::relop, '<>', line)
-                        }
-                        if (current_buff[fp] = '=')
-                        {
-                            return Token(TokenType::relop, '<=', line)
-                        }
-                        return Token(TokenType::relop, '<', line)    
-                    }
-                    return Token(TokenType::relop, '=', line)
+                string relop;
+                relop += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
                 }
-                
                 else{
-                    fill_buffer(ifstream& file,array<char, buffer_size>& buffer_new)
-                    buffer = &buffer_new;
-                    two_buffer = true;
-                    continue;
+                    switch_buffer();
                 }
-                }while (true);
                 
+                if (is_end_relop(current_buff[fp])){
+                    relop += current_buff[fp];
+                    if (check_relop(relop)){
+                        // ali : fp ++  but too much code if i want to add if and else
+                    return Token(TokenType::PUNCTUATOR,relop,line);}
+                    else{
+                        // ali : error
+                    }
+                }
+                else{
+                    // ali : fp ++  but too much code if i want to add if and else
+                    return Token(TokenType::PUNCTUATOR,relop,line);
+                }
+                           
                 
             }
+
+            else if (is_multop(current_buff[fp])){
+                string mul;
+                mul += current_buff[fp];
+                if (fp < buffer_size-1){
+                    fp++;
+                }
+                else{
+                    switch_buffer();
+                }
+                return Token(TokenType::MULTOP,mul,line);
+            }
+
+            else {
+                // error 
+            }
+
 
 
 
 
 
         };
-        return Token(TokenType::ENDOFBUFFER,"0",0); 
+        switch_buffer();
 
 
 
