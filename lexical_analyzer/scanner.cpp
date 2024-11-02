@@ -220,15 +220,12 @@ public:
 
     Token tokenize(){
 
-        // ali : label_1 
-        // سعی میشود هر بار که حلقه پایین شروع میشود وکتور خالی باشد
-        // ولی با توجه به بافر ها بعضی وقت ها این موضوع شدنی نیست.
        
         while ( fp < buffer_size-1 ) {
             
 
             if (is_delimiter(current_buff[fp])){
-                // ali : label_1 
+                // 
                 fp++;
                 continue;
             }
