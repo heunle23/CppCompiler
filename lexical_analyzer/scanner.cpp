@@ -205,7 +205,7 @@ public:
             
 
 
-            if (is_delimiter((current_buff)[i])){
+            if (is_delimiter(current_buff[i])){
                 // ali : label_1 
                 if (temp.size() == 0){
                     fp++;
@@ -220,7 +220,7 @@ public:
             }
             
             // identifier or keyword
-            if (isAlpha((current_buff)[fp])){
+            if (isAlpha(current_buff[fp])){
                 bp = fp;
                 do {
                     if (fp != buffer_size-1){
@@ -237,24 +237,38 @@ public:
                         
                     }
                 }
-                while (!is_delimiter((current_buff)[fp]) && isAlphaNumeric((current_buff)[fp]) );
+                while (!is_delimiter(current_buff[fp]) && isAlphaNumeric(current_buff[fp]) );
                 
-                if  ( is_delimiter((current_buff)[fp]) ){
+                if  ( is_delimiter(current_buff[fp]) ){
                     retract();
                 }
-                else if (!isAlphaNumeric((current_buff)[fp]))
+                else if (!isAlphaNumeric(current_buff[fp]))
                 {
                     /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
                 }
             
                 // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token 
                 string word = "";
-                previous_buff[bp]
+                if (is_token_seperated){
+                    for (int i = bp; bp < 128; bp++){
+                        word += previous_buff[i];}
+                    for (int i = 0; i <= fp; bp++){
+                        word += current_buff[i];
+                    }
+                }
+                else{
+                    for (i = bp; i <= fp; i++){
+                        word += current_buff[i];
+                    }
+                }
+
                 
                 if (keywords.find(word) != keywords.end()) {
+                    return Token(TokenType::KEYWORD, word, line);
                     
                 }
                 else{
+                    return Token(TokenType::IDENTIFIER, word, line);
 
                 }
                 
@@ -262,25 +276,25 @@ public:
                     }
 
 
-            else if (isDigit((*buffer)[fp])){
+            else if (isDigit(current_buff[fp])){
                 if (temp.size() == 0){
-                    temp.emplace_back((*buffer)[fp]);
+                    temp.emplace_back(current_buff[fp]);
                     do {
                         i++;
                         if (i<100){
-                            temp.emplace_back((*buffer)[fp]);   
+                            temp.emplace_back(current_buff[fp]);   
                         }
                         else{
                             // ali : if the program comes to this else the vector for next loop wont be empty!
                             return Token(TokenType::ENDOFBUFFER,"0",0);
                         }
                     }
-                    while (! is_delimiter((*buffer)[fp]) || isDigit((*buffer)[fp]) );
+                    while (! is_delimiter(current_buff[fp]) || isDigit(current_buff[fp]) );
                     
-                    if  ( is_delimiter((*buffer)[fp]) ){
+                    if  ( is_delimiter(current_buff[fp]) ){
                         retract();
                     }
-                    else if (!isDigit((*buffer)[fp]))
+                    else if (!isDigit(current_buff[fp]))
                     {
                         /* raise lexical error */
                     }
@@ -297,7 +311,7 @@ public:
                     while ( j < temp.size() ){
                         if (isAlpha(temp[j])){
                             // ali :if we find one alpha so this was ofc a identifier
-                            temp.emplace_back((*buffer)[fp]);
+                            temp.emplace_back(current_buff[fp]);
 
 
 
@@ -306,7 +320,7 @@ public:
                     do {
                         i++;
                         if (i < buffer_size){
-                            temp.emplace_back((*buffer)[fp]);  
+                            temp.emplace_back(current_buff[fp]);  
                         }
                         else{
                             // ali : (NEEDS TO BE IMPLEMENTED) if the program comes to this else , the vector for next loop wont be empty!
@@ -315,12 +329,12 @@ public:
                             return Token(TokenType::ENDOFBUFFER,"0",0); 
                         }
                     }
-                    while (! is_delimiter((*buffer)[fp]) && isAlphaNumeric((*buffer)[fp]) );
+                    while (! is_delimiter(current_buff[fp]) && isAlphaNumeric(current_buff[fp]) );
                     
-                    if  ( is_delimiter((*buffer)[fp]) ){
+                    if  ( is_delimiter(current_buff[fp]) ){
                         retract();
                     }
-                    else if (!isAlphaNumeric((*buffer)[fp]))
+                    else if (!isAlphaNumeric(current_buff[fp]))
                     {
                         /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
                     }
@@ -348,7 +362,7 @@ public:
 
             // ali : couldnt write it 
 
-            else if (is_addop((*buffer)[fp])) {
+            else if (is_addop(current_buff[fp])) {
                 if (temp.size() == 0){
                     // ali : create addop token (NEEDS TO BE IMPLEMENTED)
                     i++;
@@ -363,32 +377,30 @@ public:
                 continue;
             }
 
-            else if (is_equl((*buffer)[fp])) {
+            else if (is_equl(current_buff[fp])) {
                 // ali : create relop token (NEEDS TO BE IMPLEMENTED)
                 i++;
                 continue;
             }
 
-            else if (is_start_relop((*buffer)[fp])){
+            else if (is_start_relop(current_buff[fp])){
                 do{
-                if (!two_buffer)
-                    bp = fp;
                 
                 if (fp<100){
-                    if ((*buffer)[fp] == '>'){
+                    if (current_buff[fp] == '>'){
                         fp++;
-                        if ((*buffer)[fp] == '='){
+                        if (current_buff[fp] == '='){
                             return Token(TokenType::relop, '>=', line)
                         }
                         return Token(TokenType::relop, '>', line)
                     }
                         
-                    if ((*buffer)[fp] == '<'){
+                    if (current_buff[fp] == '<'){
                         fp++;
-                        if ((*buffer)[fp] == '>'){
+                        if (current_buff[fp] == '>'){
                             return Token(TokenType::relop, '<>', line)
                         }
-                        if ((*buffer)[fp] = '=')
+                        if (current_buff[fp] = '=')
                         {
                             return Token(TokenType::relop, '<=', line)
                         }
