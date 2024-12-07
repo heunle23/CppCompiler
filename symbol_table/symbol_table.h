@@ -10,7 +10,6 @@ struct Node{
 
     Node(string name){
         this->name = name;
-        //this->info = info;
         this->next = nullptr;
     }
 };
@@ -18,7 +17,7 @@ struct Node{
 class SymbolTable{
 
 private:
-// Node* table[MAX];
+
 
 public:
     Node* table[100];
