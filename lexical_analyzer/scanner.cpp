@@ -279,6 +279,11 @@ public:
                     if (is_multop(word)){
                         return Token(TokenType::MULTOP, word, line);
                     }
+
+                    if (word == "DOWN"){
+                        word = "DOWN TO" ;
+                    }
+
                     return Token(TokenType::KEYWORD, word, line);
                     
                 }
