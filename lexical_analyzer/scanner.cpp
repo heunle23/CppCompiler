@@ -159,6 +159,7 @@ public:
         keywords["TO"] = TokenType::KEYWORD;
         keywords["IF"] = TokenType::KEYWORD;
         keywords["THEN"] = TokenType::KEYWORD;
+        keywords["VAR"] = TokenType::KEYWORD;
         
 
 
