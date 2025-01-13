@@ -22,13 +22,19 @@ enum class TokenType {
 // Recursive Descent First Half of the grammer
 class RDFH{
     
-    Token lexitem;
-    LexicalAnalyzer lexianalyzer;
+    LexicalAnalyzer analyzer; 
+    Token lexitem = analyzer.touch(); 
     int error_count  = 0;
-    SPSH Expression;
+    SPSH* pointer_to_SHSP;
+
+
+    RDFH() {
+        pointer_to_SHSP = new SPSH(analyzer);
+    };
+
 
     void scanner(){
-        lexitem = lexianalyzer.touch(); 
+        lexitem = analyzer.touch(); 
         }
 
     
@@ -39,7 +45,7 @@ class RDFH{
 
 
     void ParseProgram(){
-        scanner(); // تنها باری که اسکنر صدا زده میشود ولی قبلش مقایسه رخ نداده
+        
 
         if ( !(lexitem.type == TokenType::KEYWORD && lexitem.value == "PROGRAM")){
             error_count +=1 ;
@@ -312,7 +318,7 @@ class RDFH{
             else if (lexitem.value == "IF")
             {
                 scanner();
-                ParseExpression();
+                ParseExpression(lexitem);
 
                 if ( !(lexitem.type == TokenType::KEYWORD && lexitem.value == "THEN "))
                 {
@@ -337,7 +343,7 @@ class RDFH{
             else if(lexitem.value == "WHILE")
             {
                 scanner();
-                ParseExpression();
+                ParseExpression(lexitem);
 
                 if ( !(lexitem.type == TokenType::KEYWORD && lexitem.value == "DO "))
                 {
@@ -366,7 +372,7 @@ class RDFH{
                     cerr << "error at line = " << lexitem.line << endl << "should use semicolon " << endl;
                 }
                 scanner();
-                ParseExpression();
+                ParseExpression(lexitem);
 
                 if ( lexitem.type == TokenType::KEYWORD && (lexitem.value == "TO" || lexitem.value == "DOWN TO" ))
                 {
@@ -374,7 +380,7 @@ class RDFH{
                     cerr << "error at line = " << lexitem.line << endl << "should use DOWN or  DOWN TO " << endl;
                 }
                 scanner();
-                ParseExpression();
+                ParseExpression(lexitem);
 
                 if ( !(lexitem.type == TokenType::KEYWORD && lexitem.value == "DO "))
                 {
@@ -399,8 +405,9 @@ class RDFH{
     }
 
 
-    void ParseExpression(){
-        Expression.ParseExpression();
+    void ParseExpression(Token a){
+        
+        pointer_to_SHSP->ParseExpression(a);
     };
 
 };
