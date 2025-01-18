@@ -6,8 +6,10 @@ using namespace std;
 #include <vector>
 #include <array>
 
+
 const int buffer_size = 128;
 const char end_of_line = '\n';
+
 
 enum class TokenType {
     KEYWORD,
@@ -24,9 +26,6 @@ enum class TokenType {
 
 
 
-
-
-
 // Struct to represent a token with its type and value
 struct Token {
     TokenType type;
@@ -38,12 +37,13 @@ struct Token {
 };
 
 
+
 class Tools {
 public:
     array<char, buffer_size> current_buff, previous_buff;
     //array<char, buffer_size>
     vector<char> temp;
-    int line = 0;
+    int line = 1;
     int i=0;
     bool is_token_seperated = false; // if true our bp is in the previous_buff. and fp in current_buff.
     ifstream file;
@@ -467,20 +467,6 @@ public:
         
     };
         
-        
-
-
-
-
-
-
-
-
-    
-
-
-    
-
 
 
 };
