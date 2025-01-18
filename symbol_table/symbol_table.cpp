@@ -6,7 +6,7 @@ const int MAX = 100;
 
 struct Node{
     string name;
-    string info; // نیاز به بازنویسی دارد
+    string info; 
     
 
     Node* next;
