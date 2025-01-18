@@ -18,6 +18,7 @@ bool create_file(string file_name){
     return 1;
 }
 
+
 bool append_file(string data, string file_name){
     ofstream file;
     // با استفاده از ios::app به اخر فایل اضافه میکنیم
@@ -27,6 +28,7 @@ bool append_file(string data, string file_name){
     file << endl << data;
     return 1;
 }
+
 
 bool read_file(string file_name){
     ifstream file;

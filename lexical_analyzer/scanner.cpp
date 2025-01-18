@@ -41,14 +41,13 @@ struct Token {
 class Tools {
 public:
     array<char, buffer_size> current_buff, previous_buff;
-    //array<char, buffer_size>
     vector<char> temp;
     int line = 1;
     int i=0;
     bool is_token_seperated = false; // if true our bp is in the previous_buff. and fp in current_buff.
     ifstream file;
     Token token;
-    int bp , fp;
+    int bp , fp = 0;
     
 
 
@@ -115,7 +114,7 @@ public:
     }
 
     bool is_delimiter(char c){
-        // ali : we check if '\n' is used , we increase the line int .
+        // ali : we check if  'end_of_line'  is used , we increase the line int .
         if (c == end_of_line){
             line++;
         }
@@ -217,8 +216,9 @@ public:
     }
 
 
-//
-
+    // مهم ترین قسمت اسکنر
+    // تابع پاین تولید کننده توکن میباشد
+    //
     Token tokenize(){
 
        
@@ -231,7 +231,7 @@ public:
                 continue;
             }
             
-            // identifier or keyword
+            // 1. identifier or keyword
             if (isAlpha(current_buff[fp])){
                 bp = fp;
                 do {
@@ -245,6 +245,7 @@ public:
                         }
                         else{
                             //  lexical error // message : the lenght of token cant be more than 256
+                            cerr << "the lenght of token cant be more than 256" << endl ;
                         }
                         
                     }
@@ -256,10 +257,11 @@ public:
                 }
                 else if (!isAlphaNumeric(current_buff[fp]))
                 {
-                    /*ali : raise lexical error  (NEEDS TO BE IMPLEMENTED) */  
+                    /*ali : raise lexical error  */  
+                    cerr << "not a valid token based on grammer." << endl;
                 }
             
-                // ali : (NEEDS TO BE IMPLEMENTED) clean the vector  and making the identifier or keyword  or  multop token 
+                
                 string word = "";
                 if (is_token_seperated){
                     for (int i = bp; bp < 128; bp++){
@@ -295,7 +297,7 @@ public:
                 is_token_seperated = false;
                     }
 
-
+            // 2. digits
             else if (isDigit(current_buff[fp])){
                 bp = fp;
                 do {
@@ -310,6 +312,7 @@ public:
                         }
                         else{
                             //  lexical error // message : the lenght of token cant be more than 256
+                            cerr << "the lenght of token cant be more than 256" << endl ;
                         }
                     }
                 }
@@ -321,6 +324,7 @@ public:
                 else if (!isDigit(current_buff[fp]))
                 {
                     /* raise lexical error -> start with digit but alpha after that */
+                    cerr << "not a valid token based on grammer." << endl;
                 }
 
 
@@ -345,9 +349,9 @@ public:
                 
 
 
-
+            // 3. ADD_SIGN
             else if (current_buff[fp]== '+') {
-                string sign;
+                string sign = "";
                 sign += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -357,9 +361,10 @@ public:
                 }
                 return Token(TokenType::ADD_SIGN,sign,line);
             }
-
+            
+            // 4. MINUS_SIGN
             else if (current_buff[fp]== '-') {
-                string sign;
+                string sign = "";
                 sign += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -370,8 +375,9 @@ public:
                 return Token(TokenType::MINUS_SIGN,sign,line);
             }
 
+            //5. PUNCTUATOR
             else if (is_punc(current_buff[fp])) {
-                string punc;
+                string punc = "";
                 punc += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -382,8 +388,9 @@ public:
                 return Token(TokenType::PUNCTUATOR,punc,line);
             }
 
+            // 5.1 PUNCTUATOR
             else if (current_buff[fp] == ':') {
-                string punc;
+                string punc = "";
                 punc += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -399,8 +406,9 @@ public:
                 return Token(TokenType::PUNCTUATOR,punc,line);
             }
 
+            // 6. RELATION_OPERATOR
             else if (is_equl(current_buff[fp])) {
-                string rel;
+                string rel= "";
                 rel += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -411,8 +419,9 @@ public:
                 return Token(TokenType::RELATION_OPERATOR,rel,line);
             }
 
+            // 7. relop
             else if (is_start_relop(current_buff[fp])){
-                string relop;
+                string relop = "";
                 relop += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -438,8 +447,9 @@ public:
                 
             }
 
+            // 8. multop
             else if (is_multop(current_buff[fp])){
-                string mul;
+                string mul = "";
                 mul += current_buff[fp];
                 if (fp < buffer_size-1){
                     fp++;
@@ -475,7 +485,4 @@ public:
 
 
 
-int main() {
-    
-}
-    
+
