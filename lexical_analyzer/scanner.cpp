@@ -471,14 +471,9 @@ public:
 
         };
         switch_buffer();
-
-
-
         
     };
         
-
-
 };
 
 
